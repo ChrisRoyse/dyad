@@ -89,6 +89,16 @@ const validInvokeChannels = [
   "open-ios",
   "open-android",
   "check-problems",
+  // MCP (Model Context Protocol) channels
+  "mcp:list-servers",
+  "mcp:get-server",
+  "mcp:create-server",
+  "mcp:update-server",
+  "mcp:delete-server",
+  "mcp:connect-server",
+  "mcp:disconnect-server",
+  "mcp:execute-tool",
+  "mcp:read-resource",
   // Test-only channels
   // These should ALWAYS be guarded with IS_TEST_BUILD in the main process.
   // We can't detect with IS_TEST_BUILD in the preload script because
@@ -106,6 +116,7 @@ const validReceiveChannels = [
   "github:flow-success",
   "github:flow-error",
   "deep-link-received",
+  "mcp:server-status-changed",
 ] as const;
 
 type ValidInvokeChannel = (typeof validInvokeChannels)[number];

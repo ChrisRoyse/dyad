@@ -28,6 +28,7 @@ import { useCheckoutVersion } from "@/hooks/useCheckoutVersion";
 import { useRenameBranch } from "@/hooks/useRenameBranch";
 import { isAnyCheckoutVersionInProgressAtom } from "@/store/appAtoms";
 import { LoadingBar } from "../ui/LoadingBar";
+import { MCPToolIndicatorCompact } from "../MCPToolIndicatorCompact";
 
 interface ChatHeaderProps {
   isVersionPaneOpen: boolean;
@@ -188,6 +189,7 @@ export function ChatHeader({
               ? "..."
               : `Version ${versions.length}${versionPostfix}`}
           </Button>
+          <MCPToolIndicatorCompact />
         </div>
 
         <button

@@ -120,3 +120,65 @@ export const languageModelsRelations = relations(
     }),
   }),
 );
+
+// MCP (Model Context Protocol) Server tables
+export const mcp_servers = sqliteTable("mcp_servers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  description: text("description"),
+  transport_type: text("transport_type", { enum: ["stdio", "http", "websocket"] }).notNull(),
+  command: text("command"), // For stdio transport
+  args: text("args", { mode: "json" }), // Array of arguments for stdio
+  url: text("url"), // For http/websocket transport
+  env_vars: text("env_vars", { mode: "json" }), // Environment variables as JSON object
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export const mcp_server_tools = sqliteTable("mcp_server_tools", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  serverId: integer("server_id")
+    .notNull()
+    .references(() => mcp_servers.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  inputSchema: text("input_schema", { mode: "json" }),
+  lastSyncedAt: integer("last_synced_at", { mode: "timestamp" }),
+});
+
+export const mcp_server_resources = sqliteTable("mcp_server_resources", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  serverId: integer("server_id")
+    .notNull()
+    .references(() => mcp_servers.id, { onDelete: "cascade" }),
+  uri: text("uri").notNull(),
+  name: text("name"),
+  description: text("description"),
+  mimeType: text("mime_type"),
+  lastSyncedAt: integer("last_synced_at", { mode: "timestamp" }),
+});
+
+// Define relations for MCP tables
+export const mcpServersRelations = relations(mcp_servers, ({ many }) => ({
+  tools: many(mcp_server_tools),
+  resources: many(mcp_server_resources),
+}));
+
+export const mcpServerToolsRelations = relations(mcp_server_tools, ({ one }) => ({
+  server: one(mcp_servers, {
+    fields: [mcp_server_tools.serverId],
+    references: [mcp_servers.id],
+  }),
+}));
+
+export const mcpServerResourcesRelations = relations(mcp_server_resources, ({ one }) => ({
+  server: one(mcp_servers, {
+    fields: [mcp_server_resources.serverId],
+    references: [mcp_servers.id],
+  }),
+}));

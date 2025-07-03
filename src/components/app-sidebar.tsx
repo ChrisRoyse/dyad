@@ -1,4 +1,4 @@
-import { Home, Inbox, Settings, HelpCircle, Store } from "lucide-react";
+import { Home, Inbox, Settings, HelpCircle, Store, Plug } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
 import { useEffect, useState, useRef } from "react";
@@ -32,6 +32,11 @@ const items = [
     title: "Chat",
     to: "/chat",
     icon: Inbox,
+  },
+  {
+    title: "MCP Servers",
+    to: "/mcp-servers",
+    icon: Plug,
   },
   {
     title: "Settings",

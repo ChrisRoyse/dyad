@@ -23,6 +23,7 @@ import { registerContextPathsHandlers } from "./handlers/context_paths_handlers"
 import { registerAppUpgradeHandlers } from "./handlers/app_upgrade_handlers";
 import { registerCapacitorHandlers } from "./handlers/capacitor_handlers";
 import { registerProblemsHandlers } from "./handlers/problems_handlers";
+import { initializeMCPServers } from "./handlers/mcp_handlers";
 
 export function registerIpcHandlers() {
   // Register all IPC handlers by category
@@ -51,4 +52,7 @@ export function registerIpcHandlers() {
   registerContextPathsHandlers();
   registerAppUpgradeHandlers();
   registerCapacitorHandlers();
+  
+  // Initialize MCP servers after all handlers are registered
+  initializeMCPServers();
 }

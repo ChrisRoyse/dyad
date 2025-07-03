@@ -46,6 +46,7 @@ import { validateChatContext } from "../utils/context_paths_utils";
 import { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 
 import { getExtraProviderOptions } from "../utils/thinking_utils";
+import { getMCPTools, createMCPResourceTool } from "../utils/mcp_tools";
 
 import { safeSend } from "../utils/safe_sender";
 import { cleanFullResponse } from "../utils/cleanFullResponse";
@@ -131,6 +132,21 @@ async function processStreamChunks({
       }
 
       chunk += escapeDyadTags(part.textDelta);
+    } else if (part.type === "tool-call") {
+      // Handle tool calls - show what tool is being called
+      chunk = `\n**Calling tool:** ${part.toolName}\n`;
+      if (part.args && Object.keys(part.args).length > 0) {
+        chunk += `**Arguments:** ${JSON.stringify(part.args, null, 2)}\n`;
+      }
+    } else if (part.type === "tool-result") {
+      // Handle tool results - show the output
+      chunk = `\n**Tool result:**\n`;
+      if (typeof part.result === "string") {
+        chunk += part.result;
+      } else {
+        chunk += JSON.stringify(part.result, null, 2);
+      }
+      chunk += "\n\n";
     }
 
     if (!chunk) {
@@ -531,11 +547,21 @@ This conversation includes one or more image attachments. When the user uploads 
           chatMessages: CoreMessage[];
           modelClient: ModelClient;
         }) => {
+          // Get MCP tools for the current session
+          const mcpTools = await getMCPTools();
+          const mcpResourceTool = createMCPResourceTool();
+          
+          const tools = {
+            ...mcpTools,
+            mcp_read_resource: mcpResourceTool,
+          };
+
           return streamText({
             maxTokens: await getMaxTokens(settings.selectedModel),
             temperature: 0,
             maxRetries: 2,
             model: modelClient.model,
+            tools: Object.keys(tools).length > 0 ? tools : undefined,
             providerOptions: {
               "dyad-gateway": getExtraProviderOptions(
                 modelClient.builtinProviderId,

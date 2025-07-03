@@ -10,6 +10,7 @@ import { readSettings, writeSettings } from "./main/settings";
 import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
 import { handleDyadProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
+import { cleanupMCPServers } from "./ipc/handlers/mcp_handlers";
 
 log.errorHandler.startCatching();
 log.eventLogger.startLogging();
@@ -230,6 +231,13 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+// Clean up MCP servers on app quit
+app.on("before-quit", async (event) => {
+  event.preventDefault();
+  await cleanupMCPServers();
+  app.exit();
 });
 
 app.on("activate", () => {
